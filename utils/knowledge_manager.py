@@ -2,6 +2,8 @@ import os
 from typing import Optional
 from agno.knowledge.knowledge import Knowledge
 from agno.vectordb.lancedb import LanceDb
+from agno.models.openai import OpenAILike
+from agno.knowledge.chunking.fixed import FixedSizeChunking
 from utils.logger import get_logger
 
 logger = get_logger()
@@ -25,14 +27,46 @@ class KnowledgeManager:
             knowledge_dir = os.getenv("KNOWLEDGE_DIR", "tmp/lancedb")
             table_name = os.getenv("KNOWLEDGE_TABLE", "knowledge_documents")
             
-            logger.info(f"初始化Knowledge: dir={knowledge_dir}, table={table_name}")
+            embedding_model_id = os.getenv("KNOWLEDGE_EMBEDDING_MODEL", "openai/text-embedding-3-small")
+            embedding_api_key = os.getenv("KNOWLEDGE_EMBEDDING_API_KEY", "")
+            embedding_base_url = os.getenv("KNOWLEDGE_EMBEDDING_BASE_URL", "")
             
-            self._knowledge = Knowledge(
-                vector_db=LanceDb(
+            chunk_size = int(os.getenv("KNOWLEDGE_CHUNK_SIZE", "800"))
+            chunk_overlap = int(os.getenv("KNOWLEDGE_CHUNK_OVERLAP", "80"))
+            
+            logger.info(f"初始化Knowledge: dir={knowledge_dir}, table={table_name}")
+            logger.info(f"Embedding模型: {embedding_model_id}")
+            logger.info(f"分块策略: FixedSize(size={chunk_size}, overlap={chunk_overlap})")
+            
+            embedder = None
+            if embedding_api_key:
+                embedder_params = {
+                    "id": embedding_model_id,
+                    "api_key": embedding_api_key
+                }
+                if embedding_base_url:
+                    embedder_params["base_url"] = embedding_base_url
+                
+                embedder = OpenAILike(**embedder_params)
+                logger.info("使用自定义Embedding模型")
+            
+            chunking_strategy = FixedSizeChunking(
+                chunk_size=chunk_size,
+                overlap=chunk_overlap
+            )
+            
+            knowledge_params = {
+                "vector_db": LanceDb(
                     table_name=table_name,
                     uri=knowledge_dir
-                )
-            )
+                ),
+                "chunking_strategy": chunking_strategy
+            }
+            
+            if embedder:
+                knowledge_params["embedder"] = embedder
+            
+            self._knowledge = Knowledge(**knowledge_params)
             
             logger.info("Knowledge初始化成功")
             
@@ -46,20 +80,33 @@ class KnowledgeManager:
     def is_available(self) -> bool:
         return self._knowledge is not None
     
-    def add_content(self, content: str = None, path: str = None, url: str = None):
+    def add_content(self, content: str = None, path: str = None, url: str = None, 
+                   skip_if_exists: bool = True, upsert: bool = False):
         if not self.is_available():
             logger.warning("Knowledge未初始化,无法添加内容")
             return False
         
         try:
             if content:
-                self._knowledge.add_content(content=content)
+                self._knowledge.add_content(
+                    content=content,
+                    skip_if_exists=skip_if_exists,
+                    upsert=upsert
+                )
                 logger.info("成功添加文本内容到Knowledge")
             elif path:
-                self._knowledge.add_content(path=path)
+                self._knowledge.add_content(
+                    path=path,
+                    skip_if_exists=skip_if_exists,
+                    upsert=upsert
+                )
                 logger.info(f"成功添加文件到Knowledge: {path}")
             elif url:
-                self._knowledge.add_content(url=url)
+                self._knowledge.add_content(
+                    url=url,
+                    skip_if_exists=skip_if_exists,
+                    upsert=upsert
+                )
                 logger.info(f"成功添加URL到Knowledge: {url}")
             return True
         except Exception as e:
