@@ -27,7 +27,7 @@ class KnowledgeManager:
             knowledge_dir = os.getenv("KNOWLEDGE_DIR", "tmp/lancedb")
             table_name = os.getenv("KNOWLEDGE_TABLE", "knowledge_documents")
             
-            embedding_model_id = os.getenv("KNOWLEDGE_EMBEDDING_MODEL", "openai/text-embedding-3-small")
+            embedding_model_id = os.getenv("KNOWLEDGE_EMBEDDING_MODEL", "")
             embedding_api_key = os.getenv("KNOWLEDGE_EMBEDDING_API_KEY", "")
             embedding_base_url = os.getenv("KNOWLEDGE_EMBEDDING_BASE_URL", "")
             
@@ -44,13 +44,14 @@ class KnowledgeManager:
             if embedding_api_key:
                 embedder_params = {
                     "id": embedding_model_id,
-                    "api_key": embedding_api_key
+                    "api_key": embedding_api_key,
+                    "enable_batch": False
                 }
                 if embedding_base_url:
                     embedder_params["base_url"] = embedding_base_url
                 
                 embedder = OpenAIEmbedder(**embedder_params)
-                logger.info(f"使用自定义Embedding模型: {embedding_model_id}")
+                logger.info(f"使用自定义Embedding模型: {embedding_model_id} (逐条发送)")
             
             self._chunking_strategy = FixedSizeChunking(
                 chunk_size=chunk_size,
@@ -64,6 +65,9 @@ class KnowledgeManager:
             
             if embedder:
                 vector_db_params["embedder"] = embedder
+                logger.info(f"✅ 已配置自定义Embedder: {type(embedder).__name__}")
+            else:
+                logger.warning("⚠️  未配置自定义Embedder，将使用默认OpenAIEmbedder")
             
             self._knowledge = Knowledge(
                 vector_db=LanceDb(**vector_db_params)
@@ -88,22 +92,14 @@ class KnowledgeManager:
             return False
         
         try:
-            add_params = {
-                "skip_if_exists": skip_if_exists,
-                "upsert": upsert
-            }
-            
-            if self._chunking_strategy:
-                add_params["chunking_strategy"] = self._chunking_strategy
-            
             if content:
-                self._knowledge.add_content(content=content, **add_params)
+                self._knowledge.add_content(content)
                 logger.info("成功添加文本内容到Knowledge")
             elif path:
-                self._knowledge.add_content(path=path, **add_params)
+                self._knowledge.add_content(path)
                 logger.info(f"成功添加文件到Knowledge: {path}")
             elif url:
-                self._knowledge.add_content(url=url, **add_params)
+                self._knowledge.add_content(url)
                 logger.info(f"成功添加URL到Knowledge: {url}")
             return True
         except Exception as e:
