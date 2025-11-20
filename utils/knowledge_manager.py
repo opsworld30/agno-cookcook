@@ -2,7 +2,6 @@ import os
 from typing import Optional
 from agno.knowledge.knowledge import Knowledge
 from agno.vectordb.lancedb import LanceDb
-from agno.models.openai import OpenAILike
 from agno.knowledge.chunking.fixed import FixedSizeChunking
 from utils.logger import get_logger
 
@@ -39,34 +38,36 @@ class KnowledgeManager:
             logger.info(f"Embedding模型: {embedding_model_id}")
             logger.info(f"分块策略: FixedSize(size={chunk_size}, overlap={chunk_overlap})")
             
+            from agno.knowledge.embedder.openai import OpenAIEmbedder
+            
             embedder = None
             if embedding_api_key:
                 embedder_params = {
-                    "id": embedding_model_id,
+                    "model": embedding_model_id,
                     "api_key": embedding_api_key
                 }
                 if embedding_base_url:
                     embedder_params["base_url"] = embedding_base_url
                 
-                embedder = OpenAILike(**embedder_params)
-                logger.info("使用自定义Embedding模型")
+                embedder = OpenAIEmbedder(**embedder_params)
+                logger.info(f"使用自定义Embedding模型: {embedding_model_id}")
             
             self._chunking_strategy = FixedSizeChunking(
                 chunk_size=chunk_size,
                 overlap=chunk_overlap
             )
             
-            knowledge_params = {
-                "vector_db": LanceDb(
-                    table_name=table_name,
-                    uri=knowledge_dir
-                )
+            vector_db_params = {
+                "table_name": table_name,
+                "uri": knowledge_dir
             }
             
             if embedder:
-                knowledge_params["embedder"] = embedder
+                vector_db_params["embedder"] = embedder
             
-            self._knowledge = Knowledge(**knowledge_params)
+            self._knowledge = Knowledge(
+                vector_db=LanceDb(**vector_db_params)
+            )
             
             logger.info("Knowledge初始化成功")
             
