@@ -24,6 +24,10 @@ class AgentConfig:
         
         self.searxng_host = os.getenv("SEARXNG_HOST", "http://localhost:53153")
         self.exa_api_key = os.getenv("EXA_API_KEY")
+        
+        self.knowledge_dir = os.getenv("KNOWLEDGE_DIR", "tmp/lancedb")
+        self.knowledge_table = os.getenv("KNOWLEDGE_TABLE", "knowledge_documents")
+        self.enable_knowledge = os.getenv("ENABLE_KNOWLEDGE", "false").lower() == "true"
 
     def validate(self):
         if not self.api_keys:

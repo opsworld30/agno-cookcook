@@ -29,6 +29,7 @@ def create_research_workflow(config: AgentConfig = None) -> Workflow:
         db=SqliteDb(db_file=config.db_file),
         tools=[BaiduSearchTools(fixed_max_results=5)],
         add_datetime_to_context=True,
+        enable_user_memories=True,
         additional_context=get_datetime_context(),
         instructions=[
             "你是工作流的第一步：信息搜索",
@@ -46,6 +47,7 @@ def create_research_workflow(config: AgentConfig = None) -> Workflow:
         model=model,
         db=SqliteDb(db_file=config.db_file),
         add_datetime_to_context=True,
+        enable_user_memories=True,
         additional_context=get_datetime_context(),
         instructions=[
             "你是工作流的第二步：数据分析",
@@ -61,6 +63,7 @@ def create_research_workflow(config: AgentConfig = None) -> Workflow:
         model=model,
         db=SqliteDb(db_file=config.db_file),
         add_datetime_to_context=True,
+        enable_user_memories=True,
         additional_context=get_datetime_context(),
         instructions=[
             "你是工作流的最后一步：生成报告",

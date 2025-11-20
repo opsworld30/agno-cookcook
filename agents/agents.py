@@ -9,6 +9,7 @@ from agno.tools.file import FileTools
 from agno.tools.shell import ShellTools
 from agents.config import AgentConfig
 from utils.datetime_helper import get_datetime_context
+from utils.knowledge_manager import get_knowledge_manager
 
 
 def create_general_agent(config: AgentConfig = None) -> Agent:
@@ -22,18 +23,26 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
         base_url=config.base_url,
         default_headers=config.get_headers()
     )
+    
+    knowledge = None
+    search_knowledge = False
+    if config.enable_knowledge:
+        km = get_knowledge_manager()
+        if km.is_available():
+            knowledge = km.get_knowledge()
+            search_knowledge = True
 
-    return Agent(
-        id="general-assistant",
-        name="通用助手",
-        model=model,
-        db=SqliteDb(db_file=config.db_file),
-        add_history_to_context=True,
-        add_datetime_to_context=True,
-        enable_user_memories=True,
-        markdown=True,
-        additional_context=get_datetime_context(),
-        instructions=[
+    agent_params = {
+        "id": "general-assistant",
+        "name": "通用助手",
+        "model": model,
+        "db": SqliteDb(db_file=config.db_file),
+        "add_history_to_context": True,
+        "add_datetime_to_context": True,
+        "enable_user_memories": True,
+        "markdown": True,
+        "additional_context": get_datetime_context(),
+        "instructions": [
             "你是一个友好的通用AI助手",
             "你可以帮助用户处理各种日常任务和问题",
             "回答时要清晰、准确且有帮助",
@@ -41,7 +50,15 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
             "注意当前的日期时间信息，在需要时间相关的回答时使用",
             "记住用户的偏好和重要信息，提供个性化服务"
         ]
-    )
+    }
+    
+    if knowledge:
+        agent_params["knowledge"] = knowledge
+        agent_params["search_knowledge"] = search_knowledge
+        agent_params["instructions"].append("在回答问题前，先搜索知识库获取相关信息")
+        agent_params["instructions"].append("基于知识库内容提供准确答案，并引用来源")
+    
+    return Agent(**agent_params)
 
 
 def create_search_agent(config: AgentConfig = None) -> Agent:
@@ -64,6 +81,7 @@ def create_search_agent(config: AgentConfig = None) -> Agent:
         tools=[DuckDuckGoTools()],
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -74,6 +92,7 @@ def create_search_agent(config: AgentConfig = None) -> Agent:
             "如果需要多个来源验证，请进行多次搜索",
             "引用信息来源，保持客观和准确",
             "注意当前的日期时间，搜索时可以加上时间相关的关键词(如'最新'、'2024'等)",
+            "记住用户的搜索偏好和常用关键词",
             "",
             "工具使用规范：",
             "- duckduckgo_search的query参数必须是字符串类型",
@@ -104,6 +123,7 @@ def create_analyst_agent(config: AgentConfig = None) -> Agent:
         tools=[FileTools()],
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -114,7 +134,8 @@ def create_analyst_agent(config: AgentConfig = None) -> Agent:
             "用清晰的语言解释数据趋势和模式",
             "在适当的时候建议数据可视化方案",
             "生成结构化的分析报告",
-            "注意当前的日期时间，在分析时间序列数据时使用"
+            "注意当前的日期时间，在分析时间序列数据时使用",
+            "记住用户的数据分析偏好和常用指标"
         ]
     )
 
@@ -139,6 +160,7 @@ def create_coder_agent(config: AgentConfig = None) -> Agent:
         tools=[FileTools(), ShellTools()],
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -150,7 +172,8 @@ def create_coder_agent(config: AgentConfig = None) -> Agent:
             "帮助调试和修复代码问题",
             "可以执行shell命令来运行和测试代码",
             "解释复杂的技术概念时要清晰易懂",
-            "注意当前的日期时间，在生成日志、注释等时使用"
+            "注意当前的日期时间，在生成日志、注释等时使用",
+            "记住用户的编程风格和偏好"
         ]
     )
 
@@ -178,6 +201,7 @@ def create_searxng_agent(config: AgentConfig = None) -> Agent:
         )],
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -186,7 +210,8 @@ def create_searxng_agent(config: AgentConfig = None) -> Agent:
             "你可以搜索网页、新闻、科学文献、图片、视频等",
             "对搜索结果进行整理和总结，提供清晰的答案",
             "引用信息来源，保持客观和准确",
-            "注意当前的日期时间，搜索时可以加上时间相关的关键词获取最新信息"
+            "注意当前的日期时间，搜索时可以加上时间相关的关键词获取最新信息",
+            "记住用户的搜索习惯和偏好领域"
         ]
     )
 
@@ -211,6 +236,7 @@ def create_baidu_agent(config: AgentConfig = None) -> Agent:
         tools=[BaiduSearchTools(fixed_max_results=5)],
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -220,6 +246,7 @@ def create_baidu_agent(config: AgentConfig = None) -> Agent:
             "对搜索结果进行整理和总结，提供清晰的答案",
             "引用信息来源，保持客观和准确",
             "注意当前的日期时间，搜索时加上年份和'最新'等关键词获取最新信息",
+            "记住用户的中文搜索偏好和关注领域",
             "",
             "工具使用规范：",
             "- baidu_search的query参数必须是字符串类型",
@@ -254,6 +281,7 @@ def create_exa_agent(config: AgentConfig = None) -> Agent:
         tools=tools,
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -263,7 +291,8 @@ def create_exa_agent(config: AgentConfig = None) -> Agent:
             "特别擅长搜索新闻、学术内容和专业信息",
             "对搜索结果进行整理和总结，提供清晰的答案",
             "引用信息来源，保持客观和准确",
-            "注意当前的日期时间，搜索时可以指定时间范围获取最新信息"
+            "注意当前的日期时间，搜索时可以指定时间范围获取最新信息",
+            "记住用户的语义搜索偏好和专业领域"
         ] if tools else [
             "Exa搜索需要API Key",
             "请在.env文件中设置EXA_API_KEY",

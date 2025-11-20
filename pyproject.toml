@@ -8,5 +8,6 @@ dependencies = [
     "requests",
     "openai",
     "python-dotenv",
-    "agno"
+    "agno",
+    "lancedb>=0.5.0"
 ]

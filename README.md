@@ -30,6 +30,8 @@
 - ✅ **完整日志系统**: 按日期记录所有操作和错误
 - ✅ **日期时间上下文**: 所有Agent知道当前时间,搜索更准确
 - ✅ **可配置端口**: 通过环境变量自定义服务地址
+- ✅ **Memory记忆功能**: 所有Agent自动记住用户偏好和历史交互
+- ✅ **Knowledge知识库**: 通用助手支持基于文档的问答(可选)
 
 ## 快速开始
 
@@ -125,18 +127,14 @@ curl -X POST http://localhost:9001/workflows/cookcook-ai-workflow/runs \
 - [x] 完整日志记录系统
 - [x] 日期时间上下文支持
 - [x] 可配置服务端口
-
-### 🚧 进行中
-- [ ] **Memory (记忆功能)** - 让Agent记住用户偏好和历史交互
-  - [ ] Automatic Memory: 自动记忆管理
-  - [ ] Agentic Memory: Agent主动决定记忆内容
-  - [ ] 记忆检索和更新机制
-
-- [ ] **Knowledge (知识库)** - 让Agent基于文档回答问题
-  - [ ] 向量数据库集成(LanceDB)
-  - [ ] 文档加载和索引
-  - [ ] 知识检索和引用
-  - [ ] 支持PDF、文本、URL等多种内容
+- [x] **Memory (记忆功能)** - 所有Agent自动记住用户偏好和历史交互
+  - [x] Automatic Memory: 自动记忆管理
+  - [x] 集成到所有Agents和Workflow步骤
+- [x] **Knowledge (知识库)** - 通用助手支持基于文档回答问题
+  - [x] 向量数据库集成(LanceDB)
+  - [x] Knowledge管理器(单例模式)
+  - [x] 支持文本、文件、URL等多种内容
+  - [x] 可通过环境变量启用/禁用
 
 ### 📅 计划中
 - [ ] **Multimodal (多模态)** - 图片、音频、视频处理
@@ -160,7 +158,8 @@ agno-cookcook/
 ├── utils/                  # 工具模块
 │   ├── logger.py          # 日志系统
 │   ├── api_key_manager.py # API Key轮询
-│   └── datetime_helper.py # 日期时间工具
+│   ├── datetime_helper.py # 日期时间工具
+│   └── knowledge_manager.py # Knowledge管理器
 ├── logs/                   # 日志文件(自动生成)
 ├── main.py                 # 主程序入口
 ├── .env                    # 环境变量配置

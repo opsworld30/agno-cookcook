@@ -51,6 +51,9 @@ logs/
 # Agno specific
 agno.db
 
+# Knowledge/Vector DB
+tmp/
+
 # Temporary files
 *.tmp
 *.bak
