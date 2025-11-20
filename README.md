@@ -1,35 +1,41 @@
 # Agno CookCook - 多功能AI Agent系统
 
-基于Agno框架构建的多功能AI Agent系统,同时支持独立Agent、Team协作和Workflow编排三种模式。
+基于Agno框架构建的多功能AI Agent系统,支持独立Agent、Team协作和Workflow编排。
 
-## 功能特性
+## ✨ 功能特性
 
-### 1. 独立Agents
-系统包含4个专业Agent,可独立使用:
+### 🤖 Agents (7个)
+- **通用助手**: 处理日常对话和基本任务
+- **DuckDuckGo搜索**: 国际信息搜索
+- **百度搜索**: 中文信息搜索
+- **Searxng搜索**: 隐私友好的元搜索
+- **Exa搜索**: AI驱动的语义搜索
+- **数据分析师**: 数据处理和分析
+- **代码助手**: 代码编写、审查和调试
 
-- **通用助手** (`general`): 处理日常对话和基本任务
-- **搜索专家** (`search`): 实时网络搜索和信息收集
-- **数据分析师** (`analyst`): 数据处理和分析
-- **代码助手** (`coder`): 代码编写、审查和调试
+### 👥 Teams (4个)
+- **研究团队**: 多语言信息搜索 + 数据分析 + 报告生成
+- **开发团队**: 代码开发 + 性能分析 + 技术文档
+- **内容团队**: 多源素材收集 + 内容创作
+- **全功能团队**: 包含所有Agent的综合服务
 
-### 2. Team协作
-**CookCook AI Team** - 多个Agent组成团队协同工作:
-- **成员**: 搜索专家、数据分析师、代码助手
-- **协调者**: 使用独立的模型协调团队成员
-- **工作方式**: 根据任务需求自动选择合适的成员完成任务
+### 🔄 Workflows (4个)
+- **研究工作流**: 中文搜索 → 数据分析 → 报告生成
+- **开发工作流**: 需求分析 → 代码实现 → 性能测试
+- **内容工作流**: 多源收集 → 中文补充 → 内容创作
+- **数据流水线**: 数据收集 → 聚合 → 分析 → 代码 → 报告
 
-### 3. Workflow编排
-**CookCook AI Workflow** - 智能任务处理工作流:
-- **步骤1**: 搜索专家 - 收集相关信息
-- **步骤2**: 数据分析师 - 分析处理数据
-- **步骤3**: 通用助手 - 生成最终总结
-- **特点**: 线性执行,数据在步骤间自动传递
+### 🚀 核心功能
+- ✅ **多API Key轮询**: 自动轮换API Key,防止限流
+- ✅ **完整日志系统**: 按日期记录所有操作和错误
+- ✅ **日期时间上下文**: 所有Agent知道当前时间,搜索更准确
+- ✅ **可配置端口**: 通过环境变量自定义服务地址
 
 ## 快速开始
 
 ### 环境要求
 - Python 3.11+
-- OpenAI API Key
+- OpenRouter API Key (或其他兼容OpenAI的API)
 
 ### 安装依赖
 
@@ -39,26 +45,34 @@ uv sync
 
 ### 配置环境变量
 
-创建 `.env` 文件并配置:
+复制 `.env.example` 到 `.env` 并配置:
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env`:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL_NAME=gpt-4o-mini
+# 支持多个API Key,用逗号分隔
+OPENROUTER_API_KEYS=your_key_1,your_key_2,your_key_3
+OPENROUTER_MODEL=alibaba/tongyi-deepresearch-30b-a3b:free
+SERVER_PORT=9001
 ```
 
 ### 启动服务
 
 ```bash
-python main.py
-```
-
-或使用脚本:
-
-```bash
 ./run.sh
 ```
 
-服务将在 `http://0.0.0.0:9001` 启动。
+或直接运行:
+
+```bash
+python main.py
+```
+
+服务将在配置的端口启动(默认 `http://0.0.0.0:9001`)。
 
 ## API使用
 
@@ -101,87 +115,67 @@ curl -X POST http://localhost:9001/workflows/cookcook-ai-workflow/runs \
   -d "session_id=session_123"
 ```
 
+## 📋 开发计划
+
+### ✅ 已完成
+- [x] 7个专业Agents(通用、搜索、分析、代码)
+- [x] 4个Teams(研究、开发、内容、全功能)
+- [x] 4个Workflows(研究、开发、内容、数据流水线)
+- [x] 多API Key轮询机制
+- [x] 完整日志记录系统
+- [x] 日期时间上下文支持
+- [x] 可配置服务端口
+
+### 🚧 进行中
+- [ ] **Memory (记忆功能)** - 让Agent记住用户偏好和历史交互
+  - [ ] Automatic Memory: 自动记忆管理
+  - [ ] Agentic Memory: Agent主动决定记忆内容
+  - [ ] 记忆检索和更新机制
+
+- [ ] **Knowledge (知识库)** - 让Agent基于文档回答问题
+  - [ ] 向量数据库集成(LanceDB)
+  - [ ] 文档加载和索引
+  - [ ] 知识检索和引用
+  - [ ] 支持PDF、文本、URL等多种内容
+
+### 📅 计划中
+- [ ] **Multimodal (多模态)** - 图片、音频、视频处理
+- [ ] **Advanced Workflow Patterns** - 条件分支、并行执行、循环
+- [ ] **Reasoning Tools** - 推理增强
+- [ ] **Human-in-the-Loop** - 人机协作
+- [ ] **Evals** - Agent性能评估
+
 ## 项目结构
 
 ```
 agno-cookcook/
-├── agents/                    # Agent模块
-│   ├── general/              # 通用助手
-│   ├── web_search/           # 搜索专家
-│   ├── data_analysis/        # 数据分析师
-│   ├── code_assistant/       # 代码助手
-│   ├── config/               # 配置管理
-│   └── factory.py            # Agent工厂
-├── examples/                  # 示例代码
-│   ├── examples.py           # Agent基础示例
-│   ├── examples_team.py      # Team协作示例
-│   └── examples_workflow.py  # Workflow编排示例
-├── main.py                    # 主程序入口
-├── .env                       # 环境变量配置
-└── README.md                  # 项目文档
-```
-
-## 架构设计
-
-### Agent工厂模式
-使用工厂模式统一管理Agent的创建,支持:
-- 创建单个Agent
-- 创建指定类型的多个Agent
-- 创建所有Agent
-
-### 配置管理
-集中管理所有配置,包括:
-- API密钥
-- 模型选择
-- 数据库连接
-- 工具配置
-
-### 三种模式共存
-在同一个AgentOS实例中同时注册:
-- **agents**: 4个独立Agent可直接调用
-- **teams**: 1个Team(包含3个成员Agent)
-- **workflows**: 1个Workflow(包含3个步骤)
-
-用户可以根据任务特点选择最合适的方式:
-- 简单任务 → 使用独立Agent
-- 需要协作 → 使用Team
-- 复杂流程 → 使用Workflow
-
-## 示例
-
-### 运行Agent示例
-
-```bash
-python examples/examples.py
-```
-
-### 运行Team示例
-
-```bash
-python examples/examples_team.py
-```
-
-### 运行Workflow示例
-
-```bash
-python examples/examples_workflow.py
+├── agents/                 # Agent模块
+│   ├── agents.py          # 所有Agent定义
+│   ├── config.py          # 配置管理
+│   └── factory.py         # Agent工厂
+├── teams/                  # Team配置
+│   └── teams.py           # 所有Team定义
+├── workflows/              # Workflow配置
+│   └── workflows.py       # 所有Workflow定义
+├── utils/                  # 工具模块
+│   ├── logger.py          # 日志系统
+│   ├── api_key_manager.py # API Key轮询
+│   └── datetime_helper.py # 日期时间工具
+├── logs/                   # 日志文件(自动生成)
+├── main.py                 # 主程序入口
+├── .env                    # 环境变量配置
+└── README.md               # 项目文档
 ```
 
 ## 技术栈
 
 - **Agno**: 多Agent框架
-- **OpenAI**: LLM模型
-- **DuckDuckGo**: 网络搜索
+- **OpenRouter**: LLM API服务
+- **DuckDuckGo / 百度 / Searxng / Exa**: 多源搜索
 - **SQLite**: 数据存储
+- **LanceDB**: 向量数据库(计划中)
 - **FastAPI**: Web服务
 - **Uvicorn**: ASGI服务器
-
-## 开发建议
-
-1. **简单任务**: 使用独立Agent
-2. **需要协作**: 使用Team模式
-3. **复杂流程**: 使用Workflow编排
-4. **混合使用**: 根据具体场景灵活选择
 
 ## 许可证
 
