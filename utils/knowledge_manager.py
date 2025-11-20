@@ -12,6 +12,7 @@ logger = get_logger()
 class KnowledgeManager:
     _instance: Optional['KnowledgeManager'] = None
     _knowledge: Optional[Knowledge] = None
+    _chunking_strategy = None
     
     def __new__(cls):
         if cls._instance is None:
@@ -50,7 +51,7 @@ class KnowledgeManager:
                 embedder = OpenAILike(**embedder_params)
                 logger.info("使用自定义Embedding模型")
             
-            chunking_strategy = FixedSizeChunking(
+            self._chunking_strategy = FixedSizeChunking(
                 chunk_size=chunk_size,
                 overlap=chunk_overlap
             )
@@ -59,8 +60,7 @@ class KnowledgeManager:
                 "vector_db": LanceDb(
                     table_name=table_name,
                     uri=knowledge_dir
-                ),
-                "chunking_strategy": chunking_strategy
+                )
             }
             
             if embedder:
@@ -87,26 +87,22 @@ class KnowledgeManager:
             return False
         
         try:
+            add_params = {
+                "skip_if_exists": skip_if_exists,
+                "upsert": upsert
+            }
+            
+            if self._chunking_strategy:
+                add_params["chunking_strategy"] = self._chunking_strategy
+            
             if content:
-                self._knowledge.add_content(
-                    content=content,
-                    skip_if_exists=skip_if_exists,
-                    upsert=upsert
-                )
+                self._knowledge.add_content(content=content, **add_params)
                 logger.info("成功添加文本内容到Knowledge")
             elif path:
-                self._knowledge.add_content(
-                    path=path,
-                    skip_if_exists=skip_if_exists,
-                    upsert=upsert
-                )
+                self._knowledge.add_content(path=path, **add_params)
                 logger.info(f"成功添加文件到Knowledge: {path}")
             elif url:
-                self._knowledge.add_content(
-                    url=url,
-                    skip_if_exists=skip_if_exists,
-                    upsert=upsert
-                )
+                self._knowledge.add_content(url=url, **add_params)
                 logger.info(f"成功添加URL到Knowledge: {url}")
             return True
         except Exception as e:
