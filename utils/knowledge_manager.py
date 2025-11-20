@@ -43,7 +43,7 @@ class KnowledgeManager:
             embedder = None
             if embedding_api_key:
                 embedder_params = {
-                    "model": embedding_model_id,
+                    "id": embedding_model_id,
                     "api_key": embedding_api_key
                 }
                 if embedding_base_url:
