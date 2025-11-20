@@ -30,6 +30,7 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
         db=SqliteDb(db_file=config.db_file),
         add_history_to_context=True,
         add_datetime_to_context=True,
+        enable_user_memories=True,
         markdown=True,
         additional_context=get_datetime_context(),
         instructions=[
@@ -37,7 +38,8 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
             "你可以帮助用户处理各种日常任务和问题",
             "回答时要清晰、准确且有帮助",
             "如果不确定答案，请诚实告知",
-            "注意当前的日期时间信息，在需要时间相关的回答时使用"
+            "注意当前的日期时间信息，在需要时间相关的回答时使用",
+            "记住用户的偏好和重要信息，提供个性化服务"
         ]
     )
 
