@@ -48,6 +48,11 @@ logs/
 .env.local
 .env.*.local
 
+# Shell scripts with API keys
+run.sh
+add_know.sh
+*.sh
+
 # Agno specific
 agno.db
 
