@@ -57,8 +57,10 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
     if knowledge:
         agent_params["knowledge"] = knowledge
         agent_params["search_knowledge"] = search_knowledge
-        agent_params["instructions"].append("在回答问题前，先搜索知识库获取相关信息")
+        agent_params["instructions"].append("在回答问题前，先判断是否需要搜索知识库获取相关信息")
+        agent_params["instructions"].append("如果问题涉及特定领域知识，优先从知识库中查找相关内容")
         agent_params["instructions"].append("基于知识库内容提供准确答案，并引用来源")
+        agent_params["instructions"].append("如果知识库中没有相关答案，可以结合当前知识和经验提供帮助")
     
     return Agent(**agent_params)
 

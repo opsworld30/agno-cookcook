@@ -11,4 +11,5 @@ dependencies = [
     "agno",
     "lancedb>=0.5.0",
     "pandas>=2.3.3",
+    "tantivy>=0.25.0",
 ]

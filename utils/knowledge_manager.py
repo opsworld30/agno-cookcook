@@ -1,9 +1,12 @@
 import os
 from typing import Optional
+from dotenv import load_dotenv
 from agno.knowledge.knowledge import Knowledge
 from agno.vectordb.lancedb import LanceDb
 from agno.knowledge.chunking.fixed import FixedSizeChunking
 from utils.logger import get_logger
+
+load_dotenv()
 
 logger = get_logger()
 
