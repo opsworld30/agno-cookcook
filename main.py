@@ -84,6 +84,19 @@ def create_agent_os():
 agent_os = create_agent_os()
 app = agent_os.get_app()
 
+from fastapi.middleware.cors import CORSMiddleware
+from api.knowledge import router as knowledge_router
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:6660", "http://127.0.0.1:6660","https://os.agno.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(knowledge_router)
+
 
 if __name__ == "__main__":
     logger = setup_logger()

@@ -9,7 +9,7 @@ from agno.tools.file import FileTools
 from agno.tools.shell import ShellTools
 from agents.config import AgentConfig
 from utils.datetime_helper import get_datetime_context
-from utils.knowledge_manager import get_knowledge_manager
+from knowledge.knowledge_tool import KnowledgeTool
 
 
 def create_general_agent(config: AgentConfig = None) -> Agent:
@@ -23,45 +23,53 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
         base_url=config.base_url,
         default_headers=config.get_headers()
     )
-    
-    knowledge = None
-    search_knowledge = False
-    if config.enable_knowledge:
-        km = get_knowledge_manager()
-        if km.is_available():
-            knowledge = km.get_knowledge()
-            search_knowledge = True
+
+    # 检查是否配置了外部知识库
+    tools = []
+    instructions = [
+        "你是一个友好的通用AI助手",
+        "你可以帮助用户处理各种日常任务和问题",
+        "回答时要清晰、准确且有帮助",
+        "如果不确定答案，请诚实告知",
+        "注意当前的日期时间信息，在需要时间相关的回答时使用"
+    ]
+
+    if config.enable_knowledge and config.zhipu_api_key:
+        try:
+            knowledge_tool = KnowledgeTool(
+                persist_directory=config.knowledge_db_path,
+                collection_name=config.knowledge_collection_name,
+                max_results=config.knowledge_max_results
+            )
+            if knowledge_tool.available:
+                tools.append(knowledge_tool)
+                instructions.extend([
+                    "你可以使用 search_knowledge 工具搜索内置知识库",
+                    "在回答问题前，先判断是否需要搜索知识库获取相关信息",
+                    "如果问题涉及特定领域知识，优先使用知识库工具查找相关内容",
+                    "基于知识库返回的内容提供准确答案，并引用来源",
+                    "如果知识库中没有相关答案，可以结合你的知识和经验提供帮助"
+                ])
+        except Exception as e:
+            pass
 
     agent_params = {
         "id": "general-assistant",
         "name": "通用助手",
         "model": model,
         "db": SqliteDb(db_file=config.db_file),
+        "tools": tools if tools else None,
         "add_history_to_context": True,
         "add_datetime_to_context": True,
         "markdown": True,
         "additional_context": get_datetime_context(),
-        "instructions": [
-            "你是一个友好的通用AI助手",
-            "你可以帮助用户处理各种日常任务和问题",
-            "回答时要清晰、准确且有帮助",
-            "如果不确定答案，请诚实告知",
-            "注意当前的日期时间信息，在需要时间相关的回答时使用"
-        ]
+        "instructions": instructions
     }
-    
+
     if config.enable_memory:
         agent_params["enable_user_memories"] = True
         agent_params["instructions"].append("记住用户的偏好和重要信息，提供个性化服务")
-    
-    if knowledge:
-        agent_params["knowledge"] = knowledge
-        agent_params["search_knowledge"] = search_knowledge
-        agent_params["instructions"].append("在回答问题前，先判断是否需要搜索知识库获取相关信息")
-        agent_params["instructions"].append("如果问题涉及特定领域知识，优先从知识库中查找相关内容")
-        agent_params["instructions"].append("基于知识库内容提供准确答案，并引用来源")
-        agent_params["instructions"].append("如果知识库中没有相关答案，可以结合当前知识和经验提供帮助")
-    
+
     return Agent(**agent_params)
 
 

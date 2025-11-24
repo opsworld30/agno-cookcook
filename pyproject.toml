@@ -3,13 +3,23 @@ name = "agno-cookcook"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "requests",
     "openai",
     "python-dotenv",
     "agno",
-    "lancedb>=0.5.0",
-    "pandas>=2.3.3",
-    "tantivy>=0.25.0",
+    "chromadb>=0.4.0",
+    "fastapi>=0.121.3",
+    "sqlalchemy>=2.0.44",
+    "ddgs",
+    "baidusearch",
+    "searxng-search",
+    "exa-py",
+    "pycountry",
+]
+
+[tool.uv]
+override-dependencies = [
+    "onnxruntime>=1.20.0; sys_platform != 'darwin' or platform_machine != 'x86_64'",
 ]

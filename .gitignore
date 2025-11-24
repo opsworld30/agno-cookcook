@@ -64,3 +64,4 @@ tmp/
 *.bak
 .cache/
 tmp/
+data/

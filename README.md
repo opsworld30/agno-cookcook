@@ -31,7 +31,7 @@
 - ✅ **日期时间上下文**: 所有Agent知道当前时间,搜索更准确
 - ✅ **可配置端口**: 通过环境变量自定义服务地址
 - ✅ **Memory记忆功能**: 所有Agent自动记住用户偏好和历史交互
-- ✅ **Knowledge知识库**: 通用助手支持基于文档的问答(可选)
+- ✅ **内置知识库**: ChromaDB向量数据库 + 智谱Embedding实现RAG检索
 
 ## 快速开始
 
@@ -60,7 +60,15 @@ cp .env.example .env
 OPENROUTER_API_KEYS=your_key_1,your_key_2,your_key_3
 OPENROUTER_MODEL=alibaba/tongyi-deepresearch-30b-a3b:free
 SERVER_PORT=9001
+
+# 可选: 内置知识库配置 (ChromaDB + 智谱Embedding)
+ENABLE_KNOWLEDGE=true
+KNOWLEDGE_DB_PATH=./data/chroma
+KNOWLEDGE_COLLECTION_NAME=agno_knowledge
+ZHIPU_API_KEY=your_zhipu_api_key_here
 ```
+
+**知识库配置说明**: 详见 [知识库与RAG配置指南](docs/KNOWLEDGE_RAG.md)
 
 ### 启动服务
 
@@ -130,11 +138,11 @@ curl -X POST http://localhost:9001/workflows/cookcook-ai-workflow/runs \
 - [x] **Memory (记忆功能)** - 所有Agent自动记住用户偏好和历史交互
   - [x] Automatic Memory: 自动记忆管理
   - [x] 集成到所有Agents和Workflow步骤
-- [x] **Knowledge (知识库)** - 通用助手支持基于文档回答问题
-  - [x] 向量数据库集成(LanceDB)
-  - [x] Knowledge管理器(单例模式)
-  - [x] 支持文本、文件、URL等多种内容
-  - [x] 可通过环境变量启用/禁用
+- [x] **内置知识库与RAG** - ChromaDB向量数据库实现检索增强生成
+  - [x] 智谱AI Embedding-3 向量化
+  - [x] 递归字符文本分块器
+  - [x] 知识库管理工具
+  - [x] Agent自动集成知识检索
 
 ### 📅 计划中
 - [ ] **Multimodal (多模态)** - 图片、音频、视频处理
@@ -158,8 +166,18 @@ agno-cookcook/
 ├── utils/                  # 工具模块
 │   ├── logger.py          # 日志系统
 │   ├── api_key_manager.py # API Key轮询
-│   ├── datetime_helper.py # 日期时间工具
-│   └── knowledge_manager.py # Knowledge管理器
+│   └── datetime_helper.py # 日期时间工具
+├── knowledge/              # 知识库模块
+│   ├── knowledge_base.py  # ChromaDB知识库
+│   ├── embeddings.py      # 智谱Embedding
+│   ├── text_splitter.py   # 文本分块器
+│   └── knowledge_tool.py  # Agent知识检索工具
+├── docs/                   # 文档目录
+│   └── KNOWLEDGE_RAG.md   # 知识库与RAG配置指南
+├── scripts/                # 脚本工具
+│   └── add_knowledge.py   # 知识库管理CLI
+├── examples/               # 示例代码
+│   └── knowledge_example.py # 知识库使用示例
 ├── logs/                   # 日志文件(自动生成)
 ├── main.py                 # 主程序入口
 ├── .env                    # 环境变量配置
@@ -172,7 +190,8 @@ agno-cookcook/
 - **OpenRouter**: LLM API服务
 - **DuckDuckGo / 百度 / Searxng / Exa**: 多源搜索
 - **SQLite**: 数据存储
-- **LanceDB**: 向量数据库(计划中)
+- **ChromaDB**: 向量数据库
+- **智谱AI**: Embedding向量化
 - **FastAPI**: Web服务
 - **Uvicorn**: ASGI服务器
 

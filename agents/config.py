@@ -25,19 +25,17 @@ class AgentConfig:
         self.searxng_host = os.getenv("SEARXNG_HOST", "http://localhost:53153")
         self.exa_api_key = os.getenv("EXA_API_KEY")
         
-        self.knowledge_dir = os.getenv("KNOWLEDGE_DIR", "tmp/lancedb")
-        self.knowledge_table = os.getenv("KNOWLEDGE_TABLE", "knowledge_documents")
         self.enable_knowledge = os.getenv("ENABLE_KNOWLEDGE", "false").lower() == "true"
-        
-        self.knowledge_embedding_model = os.getenv("KNOWLEDGE_EMBEDDING_MODEL", "openai/text-embedding-3-small")
-        self.knowledge_embedding_api_key = os.getenv("KNOWLEDGE_EMBEDDING_API_KEY", "")
-        self.knowledge_embedding_base_url = os.getenv("KNOWLEDGE_EMBEDDING_BASE_URL", "")
-        
-        self.enable_memory = os.getenv("ENABLE_MEMORY", "true").lower() == "true"
-        
+        self.knowledge_db_path = os.getenv("KNOWLEDGE_DB_PATH", "./data/chroma")
+        self.knowledge_collection_name = os.getenv("KNOWLEDGE_COLLECTION_NAME", "agno_knowledge")
         self.knowledge_chunk_size = int(os.getenv("KNOWLEDGE_CHUNK_SIZE", "800"))
         self.knowledge_chunk_overlap = int(os.getenv("KNOWLEDGE_CHUNK_OVERLAP", "80"))
         self.knowledge_max_results = int(os.getenv("KNOWLEDGE_MAX_RESULTS", "5"))
+        
+        self.zhipu_api_key = os.getenv("ZHIPU_API_KEY", "")
+        self.zhipu_embedding_model = os.getenv("ZHIPU_EMBEDDING_MODEL", "embedding-3")
+        
+        self.enable_memory = os.getenv("ENABLE_MEMORY", "true").lower() == "true"
 
     def validate(self):
         if not self.api_keys:
