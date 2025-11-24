@@ -9,7 +9,8 @@ from agents.agents import (
     create_coder_agent,
     create_searxng_agent,
     create_baidu_agent,
-    create_exa_agent
+    create_exa_agent,
+    create_reasoning_agent
 )
 
 
@@ -24,6 +25,7 @@ class AgentFactory:
         "searxng": "Searxng搜索专家",
         "baidu": "百度搜索专家",
         "exa": "Exa搜索专家",
+        "reasoning": "推理专家",
     }
 
     def __init__(self, config: Optional[AgentConfig] = None):
@@ -57,6 +59,7 @@ class AgentFactory:
             "searxng": create_searxng_agent,
             "baidu": create_baidu_agent,
             "exa": create_exa_agent,
+            "reasoning": create_reasoning_agent,
         }
 
         if agent_type not in agent_creators:

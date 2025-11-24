@@ -128,7 +128,7 @@ curl -X POST http://localhost:9001/workflows/cookcook-ai-workflow/runs \
 ## 📋 开发计划
 
 ### ✅ 已完成
-- [x] 7个专业Agents(通用、搜索、分析、代码)
+- [x] 8个专业Agents(通用、搜索、分析、代码、推理)
 - [x] 4个Teams(研究、开发、内容、全功能)
 - [x] 4个Workflows(研究、开发、内容、数据流水线)
 - [x] 多API Key轮询机制
@@ -147,7 +147,7 @@ curl -X POST http://localhost:9001/workflows/cookcook-ai-workflow/runs \
 ### 📅 计划中
 - [ ] **Multimodal (多模态)** - 图片、音频、视频处理
 - [ ] **Advanced Workflow Patterns** - 条件分支、并行执行、循环
-- [ ] **Reasoning Tools** - 推理增强
+- [x] **Reasoning Tools** - 推理增强 ✅
 - [ ] **Human-in-the-Loop** - 人机协作
 - [ ] **Evals** - Agent性能评估
 

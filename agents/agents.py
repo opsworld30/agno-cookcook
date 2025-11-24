@@ -7,6 +7,7 @@ from agno.tools.baidusearch import BaiduSearchTools
 from agno.tools.exa import ExaTools
 from agno.tools.file import FileTools
 from agno.tools.shell import ShellTools
+from agno.tools.reasoning import ReasoningTools
 from agents.config import AgentConfig
 from utils.datetime_helper import get_datetime_context
 from knowledge.knowledge_tool import KnowledgeTool
@@ -69,6 +70,20 @@ def create_general_agent(config: AgentConfig = None) -> Agent:
     if config.enable_memory:
         agent_params["enable_user_memories"] = True
         agent_params["instructions"].append("记住用户的偏好和重要信息，提供个性化服务")
+
+    if config.enable_reasoning:
+        agent_params["reasoning"] = True
+        agent_params["reasoning_min_steps"] = config.reasoning_min_steps
+        agent_params["reasoning_max_steps"] = config.reasoning_max_steps
+        if config.reasoning_model:
+            reasoning_model = OpenAILike(
+                id=config.reasoning_model,
+                api_key=config.get_api_key(),
+                base_url=config.base_url,
+                default_headers=config.get_headers()
+            )
+            agent_params["reasoning_model"] = reasoning_model
+        agent_params["instructions"].append("对于复杂问题，使用推理模式进行深入分析和逐步推导")
 
     return Agent(**agent_params)
 
@@ -309,5 +324,46 @@ def create_exa_agent(config: AgentConfig = None) -> Agent:
             "Exa搜索需要API Key",
             "请在.env文件中设置EXA_API_KEY",
             "获取API Key: https://exa.ai"
+        ]
+    )
+
+
+
+def create_reasoning_agent(config: AgentConfig = None) -> Agent:
+    if config is None:
+        config = AgentConfig()
+    config.validate()
+
+    model = OpenAILike(
+        id=config.model,
+        api_key=config.get_api_key(),
+        base_url=config.base_url,
+        default_headers=config.get_headers()
+    )
+
+    return Agent(
+        id="reasoning-expert",
+        name="推理专家",
+        model=model,
+        db=SqliteDb(db_file=config.db_file),
+        tools=[ReasoningTools(add_instructions=True)],
+        add_history_to_context=True,
+        add_datetime_to_context=True,
+        enable_user_memories=True,
+        markdown=True,
+        additional_context=get_datetime_context(),
+        instructions=[
+            "你是一个专业的推理和问题解决专家",
+            "你擅长使用逻辑推理、批判性思维和系统分析来解决复杂问题",
+            "对于每个问题，你会：",
+            "1. 分解问题，识别关键要素",
+            "2. 使用推理工具进行逐步分析",
+            "3. 评估多个可能的解决方案",
+            "4. 验证推理过程的逻辑性",
+            "5. 提供清晰的结论和建议",
+            "在推理过程中保持透明，展示你的思考步骤",
+            "对不确定的结论给出置信度评估",
+            "注意当前的日期时间，在时间相关的推理中使用",
+            "记住用户的推理偏好和问题类型"
         ]
     )

@@ -36,6 +36,11 @@ class AgentConfig:
         self.zhipu_embedding_model = os.getenv("ZHIPU_EMBEDDING_MODEL", "embedding-3")
         
         self.enable_memory = os.getenv("ENABLE_MEMORY", "true").lower() == "true"
+        
+        self.enable_reasoning = os.getenv("ENABLE_REASONING", "false").lower() == "true"
+        self.reasoning_model = os.getenv("REASONING_MODEL", "")
+        self.reasoning_min_steps = int(os.getenv("REASONING_MIN_STEPS", "1"))
+        self.reasoning_max_steps = int(os.getenv("REASONING_MAX_STEPS", "10"))
 
     def validate(self):
         if not self.api_keys:

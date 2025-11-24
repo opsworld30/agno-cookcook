@@ -25,12 +25,12 @@ def create_agent_os():
     创建AgentOS应用，同时支持Agents、Teams和Workflows
 
     包含的功能：
-    - 独立Agents：7个专业Agent可独立使用
+    - 独立Agents：8个专业Agent可独立使用
     - Teams：4个专业团队提供协同服务
     - Workflows：4个工作流提供流程化服务
 
     Agents:
-    - 通用助手、搜索专家、数据分析师、代码助手、Searxng搜索、百度搜索、Exa搜索
+    - 通用助手、搜索专家、数据分析师、代码助手、推理专家、Searxng搜索、百度搜索、Exa搜索
 
     Teams:
     - 研究团队、开发团队、内容团队、全功能团队
@@ -49,7 +49,7 @@ def create_agent_os():
 
         factory = AgentFactory(config)
         all_agents = factory.create_all_agents()
-        logger.info(f"创建了 {len(all_agents)} 个Agents")
+        logger.info(f"创建了 {len(all_agents)} 个Agents (包含推理增强)")
         
         teams = [
             create_research_team(config),
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     print(f"  - 模型: {config.model}")
     print(f"  - 服务地址: {config.server_host}:{config.server_port}")
     
-    print("\n📦 Agents (7个):")
+    print("\n📦 Agents (8个):")
     for agent_type, description in AgentFactory.list_available_agents().items():
         print(f"  - {agent_type}: {description}")
 
